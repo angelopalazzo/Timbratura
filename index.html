@@ -3,89 +3,215 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#111827">
-<title>TIMBRATURA – Calcola l'ora di uscita</title>
+<meta name="theme-color" content="#0a0f1d">
+<title>Timbratura – Orario di uscita</title>
 <style>
-:root{color-scheme:dark;--bg:#0b1020;--panel:#151d31;--panel2:#1d2942;--text:#f4f7fb;--muted:#aab6ca;--line:#2d3a55;--accent:#78e0b1;--warn:#ffc66d;--bad:#ff8585}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#1b2a45 0,#0b1020 55%);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--text);min-height:100vh}
-main{width:min(760px,100%);margin:auto;padding:28px 16px 48px}.hero{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px}
-.brand{display:flex;align-items:center;gap:13px}.logo{width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,#78e0b1,#45a9c7);display:grid;place-items:center;color:#102032;font-size:26px;font-weight:900;box-shadow:0 8px 30px #0005}
-h1{font-size:clamp(26px,6vw,36px);letter-spacing:.04em;margin:0}.subtitle{color:var(--muted);margin:3px 0 0;font-size:14px}
-.pill{border:1px solid #3a755f;color:var(--accent);padding:6px 10px;border-radius:99px;font-size:12px;white-space:nowrap}
-.card{background:linear-gradient(180deg,#172239,#121a2c);border:1px solid var(--line);border-radius:22px;padding:22px;margin:14px 0;box-shadow:0 14px 40px #0002}
-h2{font-size:17px;margin:0 0 15px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field{display:flex;flex-direction:column;gap:7px}label{font-size:13px;color:var(--muted)}
-input{width:100%;background:#0c1425;border:1px solid #394863;border-radius:12px;color:var(--text);padding:13px 14px;font:inherit;font-size:18px;outline:none}
-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px #78e0b122}
-input[type=time]{min-height:50px}input[type=number]{min-height:50px}
-.hint{font-size:12px;color:var(--muted);margin:10px 0 0}
-.presets{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.preset{border:1px solid #40516e;background:#202d45;color:var(--text);border-radius:999px;padding:7px 12px;font:inherit;font-size:13px;cursor:pointer}.preset:hover{border-color:var(--accent)}
-.result{background:linear-gradient(135deg,#173a37,#172b3d);border:1px solid #32695b;border-radius:18px;padding:20px;text-align:center}
-.result .eyebrow{color:#b8d9cf;text-transform:uppercase;font-size:12px;letter-spacing:.12em;font-weight:700}
-.exit{font-size:clamp(42px,11vw,64px);font-weight:850;letter-spacing:-.04em;margin:4px 0;color:#a5f2ce;font-variant-numeric:tabular-nums}
-.result small{color:#c0d6d1}.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
-.stat{background:#0d1728;border:1px solid #2b3b55;border-radius:14px;padding:13px;text-align:left}.stat span{display:block;color:var(--muted);font-size:12px}.stat strong{display:block;font-size:19px;margin-top:3px;font-variant-numeric:tabular-nums}
-.meal{margin-top:14px;border-radius:16px;padding:16px;text-align:left;border:1px solid #34775d;background:#102b26}.meal.no{border-color:#8d4b4b;background:#351e27}.meal strong{display:block;font-size:17px;margin-bottom:5px}.meal p{margin:5px 0 0}.meal .detail{color:#d4dce8;font-size:13px}
-button.primary{width:100%;border:0;border-radius:14px;padding:14px 18px;background:var(--accent);color:#10251f;font:700 16px system-ui;cursor:pointer;margin-top:16px}
-button.secondary{border:1px solid #40516e;background:#202d45;color:var(--text);border-radius:12px;padding:10px 14px;font:inherit;cursor:pointer}
-.actions{display:flex;gap:10px;flex-wrap:wrap}.actions button{flex:1}
-.rules{color:var(--muted);font-size:13px}.rules li{margin:7px 0}.footer{text-align:center;color:#8391a8;font-size:12px;margin-top:22px}
-.error{color:var(--bad);font-size:13px;margin-top:10px;min-height:18px}
-@media(max-width:520px){main{padding:20px 13px 36px}.card{padding:17px;border-radius:18px}.grid{gap:10px}.pill{display:none}.stats{gap:8px}.stat strong{font-size:17px}}
+:root{
+  --bg:#0a0f1d;--card:rgba(18,26,45,.78);--line:rgba(148,163,184,.16);
+  --text:#f4f7fb;--muted:#94a3b8;--accent:#6ee7b7;--accent2:#38bdf8;
+  --warm:#fbbf24;--rose:#fb7185;
+}
+*{box-sizing:border-box}
+html{color-scheme:dark}
+body{
+  margin:0;min-height:100vh;color:var(--text);overflow-x:hidden;
+  font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  background:var(--bg);
+}
+.orb{position:fixed;border-radius:50%;filter:blur(70px);opacity:.45;z-index:-1;animation:float 14s ease-in-out infinite alternate}
+.orb.a{width:340px;height:340px;background:#0f766e;top:-120px;left:-100px}
+.orb.b{width:300px;height:300px;background:#4338ca;bottom:-120px;right:-80px;animation-duration:18s}
+.orb.c{width:220px;height:220px;background:#b45309;top:40%;left:55%;opacity:.22;animation-duration:22s}
+@keyframes float{to{transform:translate(40px,30px) scale(1.08)}}
+
+main{width:min(720px,100%);margin:auto;padding:24px 16px 56px}
+
+.hero{display:flex;align-items:center;gap:14px;margin:6px 0 22px}
+.logo{width:54px;height:54px;border-radius:18px;display:grid;place-items:center;font-size:27px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 10px 30px rgba(56,189,248,.25);
+  animation:pulse 3s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.06) rotate(-4deg)}}
+h1{margin:0;font-size:clamp(24px,6vw,34px);letter-spacing:.03em;
+  background:linear-gradient(90deg,#fff,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{margin:2px 0 0;color:var(--muted);font-size:14px}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:20px;margin:14px 0;
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 18px 50px rgba(0,0,0,.35);
+  animation:rise .5s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}}
+h2{display:flex;align-items:center;gap:10px;font-size:16px;margin:0 0 14px}
+.step{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:800;
+  background:rgba(110,231,183,.14);color:var(--accent);border:1px solid rgba(110,231,183,.35)}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field{display:flex;flex-direction:column;gap:7px}
+label{font-size:13px;color:var(--muted)}
+input{width:100%;min-height:50px;background:rgba(5,10,20,.6);border:1px solid rgba(148,163,184,.25);border-radius:14px;
+  color:var(--text);padding:13px 14px;font:inherit;font-size:18px;outline:none;color-scheme:dark;
+  transition:border-color .2s,box-shadow .2s}
+input:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(110,231,183,.15)}
+.hint{font-size:12px;color:var(--muted);margin:12px 0 0}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.chip{border:1px solid var(--line);background:rgba(148,163,184,.08);color:var(--text);border-radius:999px;
+  padding:8px 14px;font:inherit;font-size:13px;cursor:pointer;transition:all .2s}
+.chip:hover{border-color:var(--accent)}
+.chip.on{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#06231b;border-color:transparent;font-weight:700}
+
+.result{position:relative;text-align:center;padding:24px 16px 20px;border-radius:20px;
+  background:radial-gradient(circle at 50% 0,rgba(110,231,183,.22),transparent 60%),rgba(9,16,30,.6);
+  border:1px solid rgba(110,231,183,.25)}
+.eyebrow{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.exit{font-size:clamp(52px,14vw,76px);font-weight:850;letter-spacing:-.03em;line-height:1.05;margin:6px 0 4px;
+  background:linear-gradient(90deg,var(--accent),#e0f2fe);-webkit-background-clip:text;background-clip:text;color:transparent;
+  font-variant-numeric:tabular-nums}
+.exit.flash{animation:flash .45s ease}
+@keyframes flash{from{filter:brightness(1.7)}}
+.countdown{display:inline-flex;align-items:center;gap:8px;margin-top:8px;padding:7px 14px;border-radius:999px;
+  background:rgba(56,189,248,.12);color:#bae6fd;font-size:14px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--accent2);animation:ping 1.8s infinite}
+@keyframes ping{70%{box-shadow:0 0 0 10px rgba(56,189,248,0)}0%{box-shadow:0 0 0 0 rgba(56,189,248,.6)}}
+
+.timeline{margin-top:20px;text-align:left}
+.bar{display:flex;height:14px;border-radius:99px;overflow:hidden;background:rgba(148,163,184,.12);gap:3px}
+.seg{min-width:0;transition:flex-grow .5s ease}
+.seg.morning{background:linear-gradient(90deg,#34d399,#2dd4bf);border-radius:99px}
+.seg.lunch{background:repeating-linear-gradient(45deg,var(--warm) 0 6px,#f59e0b 6px 12px);border-radius:99px}
+.seg.afternoon{background:linear-gradient(90deg,#38bdf8,#818cf8);border-radius:99px}
+.legend{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-top:10px;font-size:12px;color:var(--muted)}
+.legend span::before{content:"";display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:6px;vertical-align:middle}
+.legend .m::before{background:#34d399}.legend .l::before{background:var(--warm)}.legend .a::before{background:#38bdf8}
+
+.work{margin-top:20px;text-align:left}
+.worklabel{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--muted);margin-bottom:10px}
+.worklabel strong{font-size:16px;color:var(--text);font-variant-numeric:tabular-nums}
+.track{position:relative;height:10px;border-radius:99px;background:rgba(148,163,184,.12)}
+.fill{height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .5s ease,background .3s}
+.fill.no{background:linear-gradient(90deg,var(--rose),var(--warm))}
+.tick{position:absolute;top:-5px;bottom:-5px;left:83.33%;width:2px;background:#fff;border-radius:2px}
+.tick::after{content:"soglia 6h";position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:11px;color:var(--muted);white-space:nowrap}
+
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px}
+.stat{background:rgba(5,10,20,.55);border:1px solid var(--line);border-radius:16px;padding:14px;text-align:left}
+.stat .ico{font-size:18px}
+.stat strong{display:block;font-size:20px;margin-top:4px;font-variant-numeric:tabular-nums}
+.stat span{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+
+.meal{margin-top:16px;border-radius:18px;padding:16px 18px;display:flex;gap:14px;align-items:flex-start;text-align:left;
+  border:1px solid rgba(110,231,183,.35);background:linear-gradient(135deg,rgba(16,185,129,.18),rgba(14,116,144,.12))}
+.meal.no{border-color:rgba(251,113,133,.4);background:linear-gradient(135deg,rgba(244,63,94,.16),rgba(120,53,15,.12))}
+.badge{font-size:30px;line-height:1;animation:bounce 2s ease-in-out infinite}
+@keyframes bounce{50%{transform:translateY(-4px)}}
+.meal strong{display:block;font-size:16px}
+.meal p{margin:4px 0 0;font-size:14px;color:#e2e8f0}
+.meal .detail{color:var(--muted);font-size:12px;margin-top:8px}
+
+.error{color:var(--rose);font-size:14px;min-height:20px;margin-top:12px;text-align:center}
+.btns{display:flex;gap:10px;margin-top:8px}
+button{font:inherit;cursor:pointer}
+button.primary{flex:2;border:0;border-radius:14px;padding:14px 18px;font-weight:800;font-size:16px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));color:#06231b;transition:transform .15s,filter .2s}
+button.primary:hover{filter:brightness(1.08)}
+button.primary:active{transform:scale(.98)}
+button.secondary{flex:1;border:1px solid var(--line);background:rgba(148,163,184,.08);color:var(--text);border-radius:14px;padding:14px}
+
+.rules{color:var(--muted);font-size:13px}
+.rules ul{padding-left:18px}
+.rules li{margin:7px 0}
+.rules .note{margin:12px 0 0}
+.footer{text-align:center;color:#64748b;font-size:12px;margin-top:22px}
+
+@media(max-width:520px){
+  main{padding:18px 12px 40px}
+  .card{padding:16px;border-radius:18px}
+  .grid{gap:10px}
+  .stats{gap:8px}
+  .stat strong{font-size:18px}
+  .orb.c{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
+<div class="orb a"></div><div class="orb b"></div><div class="orb c"></div>
 <main>
 <header class="hero">
-  <div class="brand"><div class="logo">⏱</div><div><h1>TIMBRATURA</h1><p class="subtitle">Il tuo orario di uscita, senza fare calcoli a mente.</p></div></div>
-  <span class="pill">CALCOLO AUTOMATICO</span>
+  <div class="logo" aria-hidden="true">⏱</div>
+  <div><h1>TIMBRATURA</h1><p class="sub">Sai già a che ora puoi uscire?</p></div>
 </header>
 
 <section class="card">
-  <h2>1 · Ingresso</h2>
-  <div class="field"><label for="start">Ora della prima timbratura</label><input id="start" type="time" value="08:00"></div>
+  <h2><span class="step">1</span>Ingresso</h2>
+  <div class="field"><label for="start">Prima timbratura</label><input id="start" type="time" value="08:00"></div>
 </section>
 
 <section class="card">
-  <h2>2 · Pausa pranzo</h2>
+  <h2><span class="step">2</span>Pausa pranzo</h2>
   <div class="grid">
-    <div class="field"><label for="lunchOut">Uscita in pausa</label><input id="lunchOut" type="time" value="13:00"></div>
-    <div class="field"><label for="lunchIn">Rientro dalla pausa</label><input id="lunchIn" type="time" value="13:30"></div>
+    <div class="field"><label for="lunchOut">Uscita</label><input id="lunchOut" type="time" value="13:00"></div>
+    <div class="field"><label for="lunchIn">Rientro</label><input id="lunchIn" type="time" value="13:30"></div>
   </div>
-  <p class="hint">La pausa standard è di 30 minuti. Ogni minuto oltre i 30 viene recuperato posticipando l'uscita.</p>
+  <p class="hint">Pausa standard: 30 minuti. Ogni minuto in più viene recuperato posticipando l'uscita.</p>
 </section>
 
 <section class="card">
-  <h2>3 · ROL</h2>
+  <h2><span class="step">3</span>ROL</h2>
   <div class="field"><label for="rol">Minuti di ROL utilizzati</label><input id="rol" type="number" min="0" max="462" step="5" value="0" inputmode="numeric"></div>
-  <div class="presets">
-    <button class="preset" data-rol="0">Nessuno</button><button class="preset" data-rol="15">15 min</button>
-    <button class="preset" data-rol="30">30 min</button><button class="preset" data-rol="60">1 ora</button>
-    <button class="preset" data-rol="120">2 ore</button><button class="preset" data-rol="180">3 ore</button>
+  <div class="chips" id="chips">
+    <button class="chip" data-rol="0">Nessuno</button>
+    <button class="chip" data-rol="15">15 min</button>
+    <button class="chip" data-rol="30">30 min</button>
+    <button class="chip" data-rol="60">1 ora</button>
+    <button class="chip" data-rol="120">2 ore</button>
+    <button class="chip" data-rol="180">3 ore</button>
   </div>
-  <p class="hint">I ROL riducono il tempo di presenza richiesto e non contano come lavoro effettivo ai fini del buono pasto.</p>
+  <p class="hint">I ROL anticipano l'uscita e non contano come lavoro effettivo ai fini del buono pasto.</p>
 </section>
 
 <section class="card" aria-live="polite">
-  <h2>4 · Il tuo risultato</h2>
+  <h2><span class="step">4</span>Il tuo giorno</h2>
+
   <div class="result">
     <div class="eyebrow">Orario di uscita</div>
     <div class="exit" id="exit">15:42</div>
-    <small id="resultCaption">Orario previsto, con pausa e ROL considerati</small>
+    <div class="countdown"><span class="dot"></span><span id="countText">—</span></div>
+
+    <div class="timeline">
+      <div class="bar" aria-hidden="true">
+        <div class="seg morning" id="segM"></div>
+        <div class="seg lunch" id="segL"></div>
+        <div class="seg afternoon" id="segA"></div>
+      </div>
+      <div class="legend"><span class="m">Mattina</span><span class="l">Pausa</span><span class="a">Pomeriggio</span></div>
+    </div>
   </div>
+
+  <div class="work">
+    <div class="worklabel"><span>Lavoro effettivo</span><strong id="work">7h 12m</strong></div>
+    <div class="track"><div class="fill" id="fill"></div><div class="tick"></div></div>
+  </div>
+
   <div class="stats">
-    <div class="stat"><span>Uscita standard</span><strong id="standard">15:42</strong></div>
-    <div class="stat"><span>Recupero pausa</span><strong id="delay">+0 min</strong></div>
-    <div class="stat"><span>ROL utilizzati</span><strong id="rolLabel">0 min</strong></div>
-    <div class="stat"><span>Lavoro effettivo</span><strong id="work">7h 12m</strong></div>
+    <div class="stat"><div class="ico">🎯</div><strong id="standard">15:42</strong><span>Uscita standard</span></div>
+    <div class="stat"><div class="ico">☕</div><strong id="delay">+0 min</strong><span>Recupero pausa</span></div>
+    <div class="stat"><div class="ico">🌴</div><strong id="rolLabel">0 min</strong><span>ROL utilizzati</span></div>
+    <div class="stat"><div class="ico">💼</div><strong id="stdWork">7h 12m</strong><span>Lavoro standard</span></div>
   </div>
+
   <div class="meal" id="mealBox">
-    <strong id="mealTitle">✅ BUONO PASTO MATURATO</strong>
-    <p id="mealMessage">Almeno 6 ore di lavoro effettivo: oggi il pranzo è salvo!</p>
-    <p class="detail" id="mealDetail">Soglia richiesta: 6h 00m · Lavoro effettivo: 7h 12m</p>
+    <div class="badge" id="mealIcon">🎉</div>
+    <div>
+      <strong id="mealTitle">Buono pasto maturato</strong>
+      <p id="mealMessage">Ottimo! Hai raggiunto almeno 6 ore di lavoro effettivo.</p>
+      <p class="detail" id="mealDetail"></p>
+    </div>
   </div>
+
   <div class="error" id="error" role="alert"></div>
-  <button class="primary" id="copy">Copia riepilogo</button>
-  <div class="actions" style="margin-top:10px"><button class="secondary" id="reset">Azzera e ripristina</button></div>
+  <div class="btns">
+    <button class="primary" id="copy">Copia riepilogo</button>
+    <button class="secondary" id="reset">Reset</button>
+  </div>
 </section>
 
 <section class="card rules">
@@ -97,58 +223,107 @@ button.secondary{border:1px solid #40516e;background:#202d45;color:var(--text);b
     <li><b>ROL:</b> anticipano l'uscita e riducono le ore di lavoro effettivo.</li>
     <li><b>Buono pasto:</b> matura solo con almeno 6 ore di lavoro effettivo, escludendo pausa e ROL.</li>
   </ul>
-  <p>Nota: il calcolo applica le regole indicate. Verifica eventuali disposizioni aziendali o del tuo CCNL su arrotondamenti, fasce orarie e maturazione del buono pasto.</p>
+  <p class="note">Nota: il calcolo applica le regole indicate. Verifica eventuali disposizioni aziendali o del tuo CCNL su arrotondamenti, fasce orarie e maturazione del buono pasto.</p>
 </section>
 <footer class="footer">TIMBRATURA · Calcolatore personale · I dati restano in questa pagina</footer>
 </main>
+
 <script>
 const $ = id => document.getElementById(id);
+const DAY = 462;        // 7h42 di presenza, pausa di 30 min compresa
+const EFFECTIVE = 432;  // 7h12 di lavoro effettivo standard
+const MEAL_MIN = 360;   // soglia buono pasto: 6h di lavoro effettivo
+
 const fmt = mins => { mins=((mins%1440)+1440)%1440; return String(Math.floor(mins/60)).padStart(2,'0')+':'+String(mins%60).padStart(2,'0'); };
 const duration = mins => `${Math.floor(mins/60)}h ${String(mins%60).padStart(2,'0')}m`;
-const readTime = id => { const v=$(id).value; if(!/^\\d{2}:\\d{2}$/.test(v)) return null; const [h,m]=v.split(':').map(Number); return h<24&&m<60?h*60+m:null; };
+const readTime = id => { const v=$(id).value; if(!/^\d{2}:\d{2}$/.test(v)) return null; const [h,m]=v.split(':').map(Number); return h<24&&m<60?h*60+m:null; };
+
 let summary = '';
+let lastExit = null;
+
+function mealJoke(rol){
+  if(rol>=120) return 'Hai conquistato tempo libero, ma il buono pasto ha già dato le dimissioni. Buon appetito… a pagamento! 😂';
+  if(rol>=60)  return 'Meno ore in ufficio, più libertà… e il conto del pranzo tutto tuo. Affare fatto? 😜';
+  return 'Hai scelto '+duration(rol)+' di libertà. Peccato: oggi il pranzo è sponsorizzato dal tuo portafoglio. 😂';
+}
+
+function countdownText(exit){
+  const d = new Date();
+  const now = d.getHours()*60 + d.getMinutes();
+  const diff = exit - now;
+  return diff > 0 ? `Mancano ${duration(diff)} all'uscita` : 'Puoi già uscire 🎉';
+}
+setInterval(()=>{ if(lastExit!==null) $('countText').textContent = countdownText(lastExit); }, 30000);
+
 function update(){
+  summary = '';
   const start=readTime('start'), out=readTime('lunchOut'), back=readTime('lunchIn');
   const rolRaw=Number($('rol').value);
-  const rol=Number.isFinite(rolRaw)?Math.max(0,Math.min(462,Math.floor(rolRaw))):0;
+  const rol=Number.isFinite(rolRaw)?Math.max(0,Math.min(DAY,Math.floor(rolRaw))):0;
+
   $('error').textContent='';
-  if(start===null||out===null||back===null){$('error').textContent='Inserisci tutti gli orari.';return;}
-  if(out<start || back<out){$('error').textContent='Controlla gli orari: la pausa deve iniziare dopo l’ingresso e il rientro dopo l’uscita.';return;}
+  document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on', Number(c.dataset.rol)===rol));
+
+  if(start===null||out===null||back===null){ $('error').textContent='Inserisci tutti gli orari.'; return; }
+  if(out<start || back<out){ $('error').textContent='Controlla gli orari: la pausa deve iniziare dopo l’ingresso e il rientro dopo l’uscita.'; return; }
   const breakMinutes=back-out;
-  if(breakMinutes>240){$('error').textContent='La durata della pausa inserita supera le 4 ore: verifica gli orari.';return;}
+  if(breakMinutes>240){ $('error').textContent='La pausa inserita supera le 4 ore: verifica gli orari.'; return; }
+
   const delay=Math.max(0,breakMinutes-30);
-  const standard=start+462;
+  const standard=start+DAY;
   const exit=standard+delay-rol;
-  // 7h42 total presence includes 30m lunch: 7h12 standard effective work.
-  // Longer lunch is compensated by a later exit; ROL reduces effective work.
-  const effective=432-rol;
-  const meal=effective>=360;
-  $('exit').textContent=fmt(exit);
+  const effective=EFFECTIVE-rol;
+  const shownEffective=Math.max(0,effective);
+  const meal=effective>=MEAL_MIN;
+
+  lastExit=exit;
+
+  const exitEl=$('exit');
+  exitEl.textContent=fmt(exit);
+  exitEl.classList.remove('flash'); void exitEl.offsetWidth; exitEl.classList.add('flash');
+  $('countText').textContent=countdownText(exit);
+
+  $('segM').style.flexGrow=Math.max(0,out-start);
+  $('segL').style.flexGrow=breakMinutes;
+  $('segA').style.flexGrow=Math.max(0,exit-back);
+
+  $('fill').style.width=Math.min(100,shownEffective/EFFECTIVE*100)+'%';
+  $('fill').classList.toggle('no',!meal);
+  $('work').textContent=duration(shownEffective);
+  $('stdWork').textContent=duration(EFFECTIVE);
+
   $('standard').textContent=fmt(standard);
   $('delay').textContent='+'+delay+' min';
   $('rolLabel').textContent=rol+' min';
-  $('work').textContent=duration(effective);
+
   $('mealBox').classList.toggle('no',!meal);
-  if(meal){
-    $('mealTitle').textContent='✅ BUONO PASTO MATURATO';
-    $('mealMessage').textContent='Ottimo! Hai raggiunto almeno 6 ore di lavoro effettivo. Il pranzo è salvo.';
-  }else{
-    $('mealTitle').textContent='🍽️ BUONO PASTO NON MATURATO';
-    const jokes=[
-      'Hai scelto '+duration(rol)+' di libertà. Peccato: oggi il pranzo è sponsorizzato dal tuo portafoglio. 😂',
-      'Il cartellino ti saluta, il buono pasto invece non ti conosce. Oggi si pranza a proprie spese! 😅',
-      'Hai conquistato tempo libero, ma il buono pasto ha già dato le dimissioni. Buon appetito… a pagamento! 😂',
-      'Meno ore in ufficio, più libertà… e il conto del pranzo tutto tuo. Affare fatto? 😜'
-    ];
-    $('mealMessage').textContent=jokes[rol>=120?2:rol>=60?3:1];
-  }
-  $('mealDetail').textContent='Soglia richiesta: 6h 00m · Lavoro effettivo: '+duration(effective);
-  summary=`TIMBRATURA\\nIngresso: ${$('start').value}\\nPausa: ${$('lunchOut').value} – ${$('lunchIn').value}\\nDurata pausa: ${breakMinutes} min\\nRecupero pausa: ${delay} min\\nROL: ${rol} min\\nUscita prevista: ${fmt(exit)}\\nLavoro effettivo: ${duration(effective)}\\nBuono pasto: ${meal?'MATURATO':'NON MATURATO'}`;
+  $('mealIcon').textContent=meal?'🎉':'🍽️';
+  $('mealTitle').textContent=meal?'Buono pasto maturato':'Buono pasto non maturato';
+  $('mealMessage').textContent=meal?'Ottimo! Hai raggiunto almeno 6 ore di lavoro effettivo. Il pranzo è salvo.':mealJoke(rol);
+  $('mealDetail').textContent='Soglia: 6h 00m · Lavoro effettivo: '+duration(shownEffective);
+
+  summary=`TIMBRATURA\nIngresso: ${$('start').value}\nPausa: ${$('lunchOut').value} – ${$('lunchIn').value}\nDurata pausa: ${breakMinutes} min\nRecupero pausa: ${delay} min\nROL: ${rol} min\nUscita prevista: ${fmt(exit)}\nLavoro effettivo: ${duration(shownEffective)}\nBuono pasto: ${meal?'MATURATO':'NON MATURATO'}`;
 }
-['start','lunchOut','lunchIn','rol'].forEach(id=>$(id).addEventListener('input',update));
-document.querySelectorAll('[data-rol]').forEach(b=>b.addEventListener('click',()=>{$('rol').value=b.dataset.rol;update();}));
-$('reset').addEventListener('click',()=>{$('start').value='08:00';$('lunchOut').value='13:00';$('lunchIn').value='13:30';$('rol').value='0';update();});
-$('copy').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(summary);$('copy').textContent='Riepilogo copiato!';setTimeout(()=>$('copy').textContent='Copia riepilogo',1800);}catch(e){$('copy').textContent='Copia non disponibile';}});
+
+['start','lunchOut','lunchIn','rol'].forEach(id=>{
+  $(id).addEventListener('input',update);
+  $(id).addEventListener('change',update);
+});
+document.querySelectorAll('.chip').forEach(b=>b.addEventListener('click',()=>{ $('rol').value=b.dataset.rol; update(); }));
+$('reset').addEventListener('click',()=>{
+  $('start').value='08:00'; $('lunchOut').value='13:00'; $('lunchIn').value='13:30'; $('rol').value='0';
+  update();
+});
+function flashCopy(text){
+  const b=$('copy'); b.textContent=text;
+  setTimeout(()=>{ b.textContent='Copia riepilogo'; },1800);
+}
+$('copy').addEventListener('click',async()=>{
+  if(!summary){ flashCopy('Nessun riepilogo da copiare'); return; }
+  try{ await navigator.clipboard.writeText(summary); flashCopy('Riepilogo copiato! ✨'); }
+  catch(e){ flashCopy('Copia non disponibile'); }
+});
+
 update();
 </script>
 </body>
