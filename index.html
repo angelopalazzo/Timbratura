@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#111827">
+<title>TIMBRATURA – Calcola l'ora di uscita</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1020;--panel:#151d31;--panel2:#1d2942;--text:#f4f7fb;--muted:#aab6ca;--line:#2d3a55;--accent:#78e0b1;--warn:#ffc66d;--bad:#ff8585}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#1b2a45 0,#0b1020 55%);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--text);min-height:100vh}
+main{width:min(760px,100%);margin:auto;padding:28px 16px 48px}.hero{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px}
+.brand{display:flex;align-items:center;gap:13px}.logo{width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,#78e0b1,#45a9c7);display:grid;place-items:center;color:#102032;font-size:26px;font-weight:900;box-shadow:0 8px 30px #0005}
+h1{font-size:clamp(26px,6vw,36px);letter-spacing:.04em;margin:0}.subtitle{color:var(--muted);margin:3px 0 0;font-size:14px}
+.pill{border:1px solid #3a755f;color:var(--accent);padding:6px 10px;border-radius:99px;font-size:12px;white-space:nowrap}
+.card{background:linear-gradient(180deg,#172239,#121a2c);border:1px solid var(--line);border-radius:22px;padding:22px;margin:14px 0;box-shadow:0 14px 40px #0002}
+h2{font-size:17px;margin:0 0 15px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field{display:flex;flex-direction:column;gap:7px}label{font-size:13px;color:var(--muted)}
+input{width:100%;background:#0c1425;border:1px solid #394863;border-radius:12px;color:var(--text);padding:13px 14px;font:inherit;font-size:18px;outline:none}
+input:focus{border-color:var(--accent);box-shadow:0 0 0 3px #78e0b122}
+input[type=time]{min-height:50px}input[type=number]{min-height:50px}
+.hint{font-size:12px;color:var(--muted);margin:10px 0 0}
+.presets{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.preset{border:1px solid #40516e;background:#202d45;color:var(--text);border-radius:999px;padding:7px 12px;font:inherit;font-size:13px;cursor:pointer}.preset:hover{border-color:var(--accent)}
+.result{background:linear-gradient(135deg,#173a37,#172b3d);border:1px solid #32695b;border-radius:18px;padding:20px;text-align:center}
+.result .eyebrow{color:#b8d9cf;text-transform:uppercase;font-size:12px;letter-spacing:.12em;font-weight:700}
+.exit{font-size:clamp(42px,11vw,64px);font-weight:850;letter-spacing:-.04em;margin:4px 0;color:#a5f2ce;font-variant-numeric:tabular-nums}
+.result small{color:#c0d6d1}.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.stat{background:#0d1728;border:1px solid #2b3b55;border-radius:14px;padding:13px;text-align:left}.stat span{display:block;color:var(--muted);font-size:12px}.stat strong{display:block;font-size:19px;margin-top:3px;font-variant-numeric:tabular-nums}
+.meal{margin-top:14px;border-radius:16px;padding:16px;text-align:left;border:1px solid #34775d;background:#102b26}.meal.no{border-color:#8d4b4b;background:#351e27}.meal strong{display:block;font-size:17px;margin-bottom:5px}.meal p{margin:5px 0 0}.meal .detail{color:#d4dce8;font-size:13px}
+button.primary{width:100%;border:0;border-radius:14px;padding:14px 18px;background:var(--accent);color:#10251f;font:700 16px system-ui;cursor:pointer;margin-top:16px}
+button.secondary{border:1px solid #40516e;background:#202d45;color:var(--text);border-radius:12px;padding:10px 14px;font:inherit;cursor:pointer}
+.actions{display:flex;gap:10px;flex-wrap:wrap}.actions button{flex:1}
+.rules{color:var(--muted);font-size:13px}.rules li{margin:7px 0}.footer{text-align:center;color:#8391a8;font-size:12px;margin-top:22px}
+.error{color:var(--bad);font-size:13px;margin-top:10px;min-height:18px}
+@media(max-width:520px){main{padding:20px 13px 36px}.card{padding:17px;border-radius:18px}.grid{gap:10px}.pill{display:none}.stats{gap:8px}.stat strong{font-size:17px}}
+</style>
+</head>
+<body>
+<main>
+<header class="hero">
+  <div class="brand"><div class="logo">⏱</div><div><h1>TIMBRATURA</h1><p class="subtitle">Il tuo orario di uscita, senza fare calcoli a mente.</p></div></div>
+  <span class="pill">CALCOLO AUTOMATICO</span>
+</header>
+
+<section class="card">
+  <h2>1 · Ingresso</h2>
+  <div class="field"><label for="start">Ora della prima timbratura</label><input id="start" type="time" value="08:00"></div>
+</section>
+
+<section class="card">
+  <h2>2 · Pausa pranzo</h2>
+  <div class="grid">
+    <div class="field"><label for="lunchOut">Uscita in pausa</label><input id="lunchOut" type="time" value="13:00"></div>
+    <div class="field"><label for="lunchIn">Rientro dalla pausa</label><input id="lunchIn" type="time" value="13:30"></div>
+  </div>
+  <p class="hint">La pausa standard è di 30 minuti. Ogni minuto oltre i 30 viene recuperato posticipando l'uscita.</p>
+</section>
+
+<section class="card">
+  <h2>3 · ROL</h2>
+  <div class="field"><label for="rol">Minuti di ROL utilizzati</label><input id="rol" type="number" min="0" max="462" step="5" value="0" inputmode="numeric"></div>
+  <div class="presets">
+    <button class="preset" data-rol="0">Nessuno</button><button class="preset" data-rol="15">15 min</button>
+    <button class="preset" data-rol="30">30 min</button><button class="preset" data-rol="60">1 ora</button>
+    <button class="preset" data-rol="120">2 ore</button><button class="preset" data-rol="180">3 ore</button>
+  </div>
+  <p class="hint">I ROL riducono il tempo di presenza richiesto e non contano come lavoro effettivo ai fini del buono pasto.</p>
+</section>
+
+<section class="card" aria-live="polite">
+  <h2>4 · Il tuo risultato</h2>
+  <div class="result">
+    <div class="eyebrow">Orario di uscita</div>
+    <div class="exit" id="exit">15:42</div>
+    <small id="resultCaption">Orario previsto, con pausa e ROL considerati</small>
+  </div>
+  <div class="stats">
+    <div class="stat"><span>Uscita standard</span><strong id="standard">15:42</strong></div>
+    <div class="stat"><span>Recupero pausa</span><strong id="delay">+0 min</strong></div>
+    <div class="stat"><span>ROL utilizzati</span><strong id="rolLabel">0 min</strong></div>
+    <div class="stat"><span>Lavoro effettivo</span><strong id="work">7h 12m</strong></div>
+  </div>
+  <div class="meal" id="mealBox">
+    <strong id="mealTitle">✅ BUONO PASTO MATURATO</strong>
+    <p id="mealMessage">Almeno 6 ore di lavoro effettivo: oggi il pranzo è salvo!</p>
+    <p class="detail" id="mealDetail">Soglia richiesta: 6h 00m · Lavoro effettivo: 7h 12m</p>
+  </div>
+  <div class="error" id="error" role="alert"></div>
+  <button class="primary" id="copy">Copia riepilogo</button>
+  <div class="actions" style="margin-top:10px"><button class="secondary" id="reset">Azzera e ripristina</button></div>
+</section>
+
+<section class="card rules">
+  <h2>Come vengono fatti i calcoli</h2>
+  <ul>
+    <li><b>Presenza standard:</b> 7 ore e 42 minuti, pausa pranzo di 30 minuti compresa.</li>
+    <li><b>Lavoro effettivo standard:</b> 7 ore e 12 minuti (7h42 − 30 min di pausa).</li>
+    <li><b>Pausa più lunga:</b> i minuti oltre i 30 vengono aggiunti all'orario di uscita.</li>
+    <li><b>ROL:</b> anticipano l'uscita e riducono le ore di lavoro effettivo.</li>
+    <li><b>Buono pasto:</b> matura solo con almeno 6 ore di lavoro effettivo, escludendo pausa e ROL.</li>
+  </ul>
+  <p>Nota: il calcolo applica le regole indicate. Verifica eventuali disposizioni aziendali o del tuo CCNL su arrotondamenti, fasce orarie e maturazione del buono pasto.</p>
+</section>
+<footer class="footer">TIMBRATURA · Calcolatore personale · I dati restano in questa pagina</footer>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const fmt = mins => { mins=((mins%1440)+1440)%1440; return String(Math.floor(mins/60)).padStart(2,'0')+':'+String(mins%60).padStart(2,'0'); };
+const duration = mins => `${Math.floor(mins/60)}h ${String(mins%60).padStart(2,'0')}m`;
+const readTime = id => { const v=$(id).value; if(!/^\\d{2}:\\d{2}$/.test(v)) return null; const [h,m]=v.split(':').map(Number); return h<24&&m<60?h*60+m:null; };
+let summary = '';
+function update(){
+  const start=readTime('start'), out=readTime('lunchOut'), back=readTime('lunchIn');
+  const rolRaw=Number($('rol').value);
+  const rol=Number.isFinite(rolRaw)?Math.max(0,Math.min(462,Math.floor(rolRaw))):0;
+  $('error').textContent='';
+  if(start===null||out===null||back===null){$('error').textContent='Inserisci tutti gli orari.';return;}
+  if(out<start || back<out){$('error').textContent='Controlla gli orari: la pausa deve iniziare dopo l’ingresso e il rientro dopo l’uscita.';return;}
+  const breakMinutes=back-out;
+  if(breakMinutes>240){$('error').textContent='La durata della pausa inserita supera le 4 ore: verifica gli orari.';return;}
+  const delay=Math.max(0,breakMinutes-30);
+  const standard=start+462;
+  const exit=standard+delay-rol;
+  // 7h42 total presence includes 30m lunch: 7h12 standard effective work.
+  // Longer lunch is compensated by a later exit; ROL reduces effective work.
+  const effective=432-rol;
+  const meal=effective>=360;
+  $('exit').textContent=fmt(exit);
+  $('standard').textContent=fmt(standard);
+  $('delay').textContent='+'+delay+' min';
+  $('rolLabel').textContent=rol+' min';
+  $('work').textContent=duration(effective);
+  $('mealBox').classList.toggle('no',!meal);
+  if(meal){
+    $('mealTitle').textContent='✅ BUONO PASTO MATURATO';
+    $('mealMessage').textContent='Ottimo! Hai raggiunto almeno 6 ore di lavoro effettivo. Il pranzo è salvo.';
+  }else{
+    $('mealTitle').textContent='🍽️ BUONO PASTO NON MATURATO';
+    const jokes=[
+      'Hai scelto '+duration(rol)+' di libertà. Peccato: oggi il pranzo è sponsorizzato dal tuo portafoglio. 😂',
+      'Il cartellino ti saluta, il buono pasto invece non ti conosce. Oggi si pranza a proprie spese! 😅',
+      'Hai conquistato tempo libero, ma il buono pasto ha già dato le dimissioni. Buon appetito… a pagamento! 😂',
+      'Meno ore in ufficio, più libertà… e il conto del pranzo tutto tuo. Affare fatto? 😜'
+    ];
+    $('mealMessage').textContent=jokes[rol>=120?2:rol>=60?3:1];
+  }
+  $('mealDetail').textContent='Soglia richiesta: 6h 00m · Lavoro effettivo: '+duration(effective);
+  summary=`TIMBRATURA\\nIngresso: ${$('start').value}\\nPausa: ${$('lunchOut').value} – ${$('lunchIn').value}\\nDurata pausa: ${breakMinutes} min\\nRecupero pausa: ${delay} min\\nROL: ${rol} min\\nUscita prevista: ${fmt(exit)}\\nLavoro effettivo: ${duration(effective)}\\nBuono pasto: ${meal?'MATURATO':'NON MATURATO'}`;
+}
+['start','lunchOut','lunchIn','rol'].forEach(id=>$(id).addEventListener('input',update));
+document.querySelectorAll('[data-rol]').forEach(b=>b.addEventListener('click',()=>{$('rol').value=b.dataset.rol;update();}));
+$('reset').addEventListener('click',()=>{$('start').value='08:00';$('lunchOut').value='13:00';$('lunchIn').value='13:30';$('rol').value='0';update();});
+$('copy').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(summary);$('copy').textContent='Riepilogo copiato!';setTimeout(()=>$('copy').textContent='Copia riepilogo',1800);}catch(e){$('copy').textContent='Copia non disponibile';}});
+update();
+</script>
+</body>
+</html>
