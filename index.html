@@ -191,8 +191,14 @@ button.secondary{flex:1;border:1px solid var(--line);background:rgba(148,163,184
   <p class="hint">I ROL anticipano l'uscita e non contano come lavoro effettivo ai fini del buono pasto.</p>
 </section>
 
+<section class="card">
+  <h2><span class="step">4</span>Permesso visita medica</h2>
+  <div class="field"><label for="visita">Ore e minuti di permesso</label><input id="visita" type="time" min="00:00" max="07:42" step="300" value="00:00"></div>
+  <p class="hint">Come il ROL: anticipa l'uscita, riduce il lavoro effettivo e non conta ai fini del buono pasto.</p>
+</section>
+
 <section class="card" aria-live="polite">
-  <h2><span class="step">4</span>Il tuo giorno</h2>
+  <h2><span class="step">5</span>Il tuo giorno</h2>
 
   <div class="result">
     <div class="eyebrow">Orario di uscita</div>
@@ -216,7 +222,7 @@ button.secondary{flex:1;border:1px solid var(--line);background:rgba(148,163,184
   <div class="stats">
     <div class="stat"><div class="ico">🎯</div><strong id="standard">15:42</strong><span>Uscita standard</span></div>
     <div class="stat"><div class="ico">☕</div><strong id="delay">+0 min</strong><span>Recupero pausa</span></div>
-    <div class="stat"><div class="ico">🌴</div><strong id="rolLabel">0 min</strong><span>ROL utilizzati</span></div>
+    <div class="stat"><div class="ico">🌴</div><strong id="rolLabel">0 min</strong><span>Permessi (ROL + visita)</span></div>
     <div class="stat"><div class="ico">💼</div><strong id="stdWork">7h 12m</strong><span>Lavoro standard</span></div>
   </div>
 
@@ -259,6 +265,7 @@ const fmt = mins => { mins=((mins%1440)+1440)%1440; return String(Math.floor(min
 const duration = mins => `${Math.floor(mins/60)}h ${String(mins%60).padStart(2,'0')}m`;
 const readTime = id => { const v=$(id).value; if(!/^\d{2}:\d{2}$/.test(v)) return null; const [h,m]=v.split(':').map(Number); return h<24&&m<60?h*60+m:null; };
 const readRol = () => { const m=/^(\d{2}):(\d{2})/.exec($('rol').value); return m ? Math.min(DAY, Number(m[1])*60+Number(m[2])) : 0; };
+const readVisita = () => { const m=/^(\d{2}):(\d{2})/.exec($('visita').value); return m ? Math.min(DAY, Number(m[1])*60+Number(m[2])) : 0; };
 const toHHMM = mins => String(Math.floor(mins/60)).padStart(2,'0')+':'+String(mins%60).padStart(2,'0');
 
 const readExtra = () => { const n=Math.floor(Number($('extraMin').value)); return Number.isFinite(n) ? Math.max(0,Math.min(240,n)) : 0; };
@@ -318,6 +325,8 @@ function update(){
   summary = '';
   const start=readTime('start');
   const rol=readRol();
+  const visita=readVisita();
+  const permessi=rol+visita;
   const delay=lunchLong?lunchExtra:0;
   const pausa=30+delay;
   const late = start!==null && start>585; // oltre le 09:45 (585 minuti)
@@ -334,8 +343,8 @@ function update(){
   if(late && rol===0){ invalid('Entrata oltre le 09:45: inserisci i minuti di ROL.'); return; }
 
   const standard=start+DAY;
-  const exit=standard+delay-rol;
-  const effective=EFFECTIVE-rol;
+  const exit=standard+delay-permessi;
+  const effective=EFFECTIVE-permessi;
   const shownEffective=Math.max(0,effective);
   const meal=effective>=MEAL_MIN;
 
@@ -355,18 +364,18 @@ function update(){
 
   $('standard').textContent=fmt(standard);
   $('delay').textContent='+'+delay+' min';
-  $('rolLabel').textContent=rol+' min';
+  $('rolLabel').textContent=permessi+' min';
 
   $('mealBox').classList.toggle('no',!meal);
   $('mealIcon').textContent=meal?'🎉':'🍽️';
   $('mealTitle').textContent=meal?'Buono pasto maturato':'Buono pasto non maturato';
-  $('mealMessage').textContent=meal?'Ottimo! Hai raggiunto almeno 6 ore di lavoro effettivo. Il pranzo è salvo.':mealJoke(rol);
+  $('mealMessage').textContent=meal?'Ottimo! Hai raggiunto almeno 6 ore di lavoro effettivo. Il pranzo è salvo.':mealJoke(permessi);
   $('mealDetail').textContent='Soglia: 6h 00m · Lavoro effettivo: '+duration(shownEffective);
 
-  summary=`TIMBRATURA\nIngresso: ${$('start').value}\nPausa: ${pausa} min\nRecupero pausa: ${delay} min\nROL: ${rol} min\nUscita prevista: ${fmt(exit)}\nLavoro effettivo: ${duration(shownEffective)}\nBuono pasto: ${meal?'MATURATO':'NON MATURATO'}`;
+  summary=`TIMBRATURA\nIngresso: ${$('start').value}\nPausa: ${pausa} min\nRecupero pausa: ${delay} min\nROL: ${rol} min\nVisita medica: ${visita} min\nUscita prevista: ${fmt(exit)}\nLavoro effettivo: ${duration(shownEffective)}\nBuono pasto: ${meal?'MATURATO':'NON MATURATO'}`;
 }
 
-['start','rol'].forEach(id=>{
+['start','rol','visita'].forEach(id=>{
   $(id).addEventListener('input',update);
   $(id).addEventListener('change',update);
 });
@@ -375,7 +384,7 @@ $('lunchNo').addEventListener('click',()=>{ lunchLong=false; lunchExtra=0; $('ex
 $('lunchYes').addEventListener('click',()=>{ lunchLong=true; update(); });
 $('extraMin').addEventListener('input',()=>{ lunchLong=true; lunchExtra=readExtra(); update(); });
 $('reset').addEventListener('click',()=>{
-  $('start').value='08:15'; $('rol').value='00:00'; $('extraMin').value=''; lunchLong=false; lunchExtra=0;
+  $('start').value='08:15'; $('rol').value='00:00'; $('visita').value='00:00'; $('extraMin').value=''; lunchLong=false; lunchExtra=0;
   update();
 });
 function flashCopy(text){
