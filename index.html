@@ -53,6 +53,8 @@ input{width:100%;min-height:50px;background:rgba(5,10,20,.6);border:1px solid rg
   transition:border-color .2s,box-shadow .2s}
 input:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(110,231,183,.15)}
 .hint{font-size:12px;color:var(--muted);margin:12px 0 0}
+.req{margin-left:auto;font-size:12px;font-weight:700;color:var(--warm);background:rgba(251,191,36,.12);padding:4px 10px;border-radius:999px}
+input.need{border-color:var(--warm);box-shadow:0 0 0 4px rgba(251,191,36,.15)}
 
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .chip{border:1px solid var(--line);background:rgba(148,163,184,.08);color:var(--text);border-radius:999px;
@@ -156,7 +158,8 @@ button.secondary{flex:1;border:1px solid var(--line);background:rgba(148,163,184
 
 <section class="card">
   <h2><span class="step">1</span>Ingresso</h2>
-  <div class="field"><label for="start">Prima timbratura</label><input id="start" type="time" value="08:00"></div>
+  <div class="field"><label for="start">Prima timbratura</label><input id="start" type="time" min="08:15" value="08:15"></div>
+  <p class="hint">Entrate consentite dalle 08:15 alle 09:45. Oltre le 09:45 il ROL è obbligatorio.</p>
 </section>
 
 <section class="card">
@@ -175,7 +178,7 @@ button.secondary{flex:1;border:1px solid var(--line);background:rgba(148,163,184
 </section>
 
 <section class="card">
-  <h2><span class="step">3</span>ROL</h2>
+  <h2><span class="step">3</span>ROL <span class="req" id="rolReq" hidden>obbligatorio dopo le 09:45</span></h2>
   <div class="field"><label for="rol">ROL utilizzati (ore:minuti)</label><input id="rol" type="time" min="00:00" max="07:42" step="300" value="00:00"></div>
   <div class="chips">
     <button class="chip" data-rol="0">Nessuno</button>
@@ -286,6 +289,17 @@ function refreshCountdown(){
 }
 setInterval(refreshCountdown,1000);
 
+function invalid(msg){
+  $('error').textContent=msg;
+  $('exit').textContent='--:--';
+  lastExit=null;
+  $('countText').textContent='—';
+  $('countBox').classList.remove('done');
+  $('segW').style.flexGrow=0;
+  $('segL').style.flexGrow=0;
+  $('fill').style.width='0%';
+}
+
 function updateLunchBox(){
   $('lunchNo').classList.toggle('on', !lunchLong);
   $('lunchYes').classList.toggle('on', lunchLong);
@@ -306,12 +320,18 @@ function update(){
   const rol=readRol();
   const delay=lunchLong?lunchExtra:0;
   const pausa=30+delay;
+  const late = start!==null && start>585; // oltre le 09:45 (585 minuti)
 
   $('error').textContent='';
   document.querySelectorAll('[data-rol]').forEach(c=>c.classList.toggle('on', Number(c.dataset.rol)===rol));
   updateLunchBox();
 
-  if(start===null){ $('error').textContent='Inserisci l’orario della prima timbratura.'; return; }
+  $('rolReq').hidden=!late;
+  $('rol').classList.toggle('need',late);
+
+  if(start===null){ invalid('Inserisci l’orario della prima timbratura.'); return; }
+  if(start<495){ invalid('L’ingresso è consentito dalle 08:15.'); return; }
+  if(late && rol===0){ invalid('Entrata oltre le 09:45: inserisci i minuti di ROL.'); return; }
 
   const standard=start+DAY;
   const exit=standard+delay-rol;
@@ -355,7 +375,7 @@ $('lunchNo').addEventListener('click',()=>{ lunchLong=false; lunchExtra=0; $('ex
 $('lunchYes').addEventListener('click',()=>{ lunchLong=true; update(); });
 $('extraMin').addEventListener('input',()=>{ lunchLong=true; lunchExtra=readExtra(); update(); });
 $('reset').addEventListener('click',()=>{
-  $('start').value='08:00'; $('rol').value='00:00'; $('extraMin').value=''; lunchLong=false; lunchExtra=0;
+  $('start').value='08:15'; $('rol').value='00:00'; $('extraMin').value=''; lunchLong=false; lunchExtra=0;
   update();
 });
 function flashCopy(text){
