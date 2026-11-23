@@ -165,16 +165,7 @@ button.secondary{flex:1;border:1px solid var(--line);background:rgba(148,163,184
       <button class="opt" id="lunchYes">Sì, più di 30</button>
     </div>
     <div class="extra" id="extra">
-      <div class="extra-label">Quanti minuti in più?</div>
-      <div class="chips">
-        <button class="chip" data-extra="5">+5 min</button>
-        <button class="chip" data-extra="10">+10 min</button>
-        <button class="chip" data-extra="15">+15 min</button>
-        <button class="chip" data-extra="20">+20 min</button>
-        <button class="chip" data-extra="30">+30 min</button>
-        <button class="chip" data-extra="45">+45 min</button>
-        <button class="chip" data-extra="60">+60 min</button>
-      </div>
+      <div class="field"><label for="extraMin">Minuti oltre i 30</label><input id="extraMin" type="number" min="1" max="240" step="1" inputmode="numeric" placeholder="es. 15"></div>
     </div>
     <p class="lunch-status" id="lunchStatus">Pausa standard di 30 minuti: nessun recupero all’uscita.</p>
   </div>
@@ -265,6 +256,8 @@ const readTime = id => { const v=$(id).value; if(!/^\d{2}:\d{2}$/.test(v)) retur
 const readRol = () => { const m=/^(\d{2}):(\d{2})/.exec($('rol').value); return m ? Math.min(DAY, Number(m[1])*60+Number(m[2])) : 0; };
 const toHHMM = mins => String(Math.floor(mins/60)).padStart(2,'0')+':'+String(mins%60).padStart(2,'0');
 
+const readExtra = () => { const n=Math.floor(Number($('extraMin').value)); return Number.isFinite(n) ? Math.max(0,Math.min(240,n)) : 0; };
+
 let summary = '';
 let lastExit = null;
 let lunchLong = false;   // pausa oltre i 30 minuti?
@@ -295,12 +288,11 @@ function updateLunchBox(){
   $('lunchNo').classList.toggle('on', !lunchLong);
   $('lunchYes').classList.toggle('on', lunchLong);
   $('extra').style.display = lunchLong ? 'flex' : 'none';
-  document.querySelectorAll('[data-extra]').forEach(c=>c.classList.toggle('on', lunchLong && Number(c.dataset.extra)===lunchExtra));
   const st=$('lunchStatus');
   if(!lunchLong){
     st.textContent='Pausa standard di 30 minuti: nessun recupero all’uscita.'; st.className='lunch-status';
   }else if(lunchExtra===0){
-    st.textContent='Seleziona di quanti minuti hai superato i 30.'; st.className='lunch-status todo';
+    st.textContent='Inserisci quanti minuti hai superato i 30.'; st.className='lunch-status todo';
   }else{
     st.textContent=`Pausa di ${30+lunchExtra} minuti: uscita posticipata di ${lunchExtra} minuti.`; st.className='lunch-status long';
   }
@@ -357,11 +349,11 @@ function update(){
   $(id).addEventListener('change',update);
 });
 document.querySelectorAll('[data-rol]').forEach(b=>b.addEventListener('click',()=>{ $('rol').value=toHHMM(Number(b.dataset.rol)); update(); }));
-$('lunchNo').addEventListener('click',()=>{ lunchLong=false; lunchExtra=0; update(); });
+$('lunchNo').addEventListener('click',()=>{ lunchLong=false; lunchExtra=0; $('extraMin').value=''; update(); });
 $('lunchYes').addEventListener('click',()=>{ lunchLong=true; update(); });
-document.querySelectorAll('[data-extra]').forEach(b=>b.addEventListener('click',()=>{ lunchLong=true; lunchExtra=Number(b.dataset.extra); update(); }));
+$('extraMin').addEventListener('input',()=>{ lunchLong=true; lunchExtra=readExtra(); update(); });
 $('reset').addEventListener('click',()=>{
-  $('start').value='08:00'; $('rol').value='00:00'; lunchLong=false; lunchExtra=0;
+  $('start').value='08:00'; $('rol').value='00:00'; $('extraMin').value=''; lunchLong=false; lunchExtra=0;
   update();
 });
 function flashCopy(text){
