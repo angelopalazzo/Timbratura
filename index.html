@@ -157,7 +157,7 @@ button.secondary{flex:1;border:1px solid var(--line);background:rgba(148,163,184
 
 <section class="card">
   <h2><span class="step">3</span>ROL</h2>
-  <div class="field"><label for="rol">Minuti di ROL utilizzati</label><input id="rol" type="number" min="0" max="462" step="5" value="0" inputmode="numeric"></div>
+  <div class="field"><label for="rol">ROL utilizzati (ore:minuti)</label><input id="rol" type="time" min="00:00" max="07:42" step="300" value="00:00"></div>
   <div class="chips" id="chips">
     <button class="chip" data-rol="0">Nessuno</button>
     <button class="chip" data-rol="15">15 min</button>
@@ -239,6 +239,9 @@ const fmt = mins => { mins=((mins%1440)+1440)%1440; return String(Math.floor(min
 const duration = mins => `${Math.floor(mins/60)}h ${String(mins%60).padStart(2,'0')}m`;
 const readTime = id => { const v=$(id).value; if(!/^\d{2}:\d{2}$/.test(v)) return null; const [h,m]=v.split(':').map(Number); return h<24&&m<60?h*60+m:null; };
 
+const readRol = () => { const m=/^(\d{2}):(\d{2})/.exec($('rol').value); return m ? Math.min(DAY, Number(m[1])*60+Number(m[2])) : 0; };
+const toHHMM = mins => String(Math.floor(mins/60)).padStart(2,'0')+':'+String(mins%60).padStart(2,'0');
+
 let summary = '';
 let lastExit = null;
 
@@ -266,8 +269,7 @@ setInterval(refreshCountdown,1000);
 function update(){
   summary = '';
   const start=readTime('start'), out=readTime('lunchOut'), back=readTime('lunchIn');
-  const rolRaw=Number($('rol').value);
-  const rol=Number.isFinite(rolRaw)?Math.max(0,Math.min(DAY,Math.floor(rolRaw))):0;
+  const rol=readRol();
 
   $('error').textContent='';
   document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on', Number(c.dataset.rol)===rol));
@@ -317,9 +319,9 @@ function update(){
   $(id).addEventListener('input',update);
   $(id).addEventListener('change',update);
 });
-document.querySelectorAll('.chip').forEach(b=>b.addEventListener('click',()=>{ $('rol').value=b.dataset.rol; update(); }));
+document.querySelectorAll('.chip').forEach(b=>b.addEventListener('click',()=>{ $('rol').value=toHHMM(Number(b.dataset.rol)); update(); }));
 $('reset').addEventListener('click',()=>{
-  $('start').value='08:00'; $('lunchOut').value='13:00'; $('lunchIn').value='13:30'; $('rol').value='0';
+  $('start').value='08:00'; $('lunchOut').value='13:00'; $('lunchIn').value='13:30'; $('rol').value='00:00';
   update();
 });
 function flashCopy(text){
